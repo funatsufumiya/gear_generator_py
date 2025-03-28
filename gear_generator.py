@@ -11,7 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'lib/gear-profile-genera
 import gear
 
 class InvoluteGear:
-    def __init__(self, module, teeth_number, pressure_angle=20.0, clearance=0.25, backlash=0.0, profile_shift=0):
+    def __init__(self, module, teeth_number, pressure_angle=20.0, clearance=0.25, backlash=0.0, profile_shift=0, frame_count=32):
         """
         Involute gear generation class
         
@@ -29,6 +29,8 @@ class InvoluteGear:
             Backlash
         profile_shift : float
             Profile shift coefficient
+        frame_count : int
+            Number of points to generate per curve (controls smoothness)
         """
         self.module = module
         self.teeth_number = teeth_number
@@ -36,6 +38,7 @@ class InvoluteGear:
         self.clearance = clearance
         self.backlash = backlash
         self.profile_shift = profile_shift
+        self.frame_count = frame_count
         
         # Calculate tooth width from module
         self.tooth_width = np.pi * module
@@ -46,7 +49,7 @@ class InvoluteGear:
             tooth_width=self.tooth_width,
             pressure_angle=gear.deg2rad(pressure_angle),
             backlash=backlash,
-            frame_count=32  # Smoothness of the curve
+            frame_count=frame_count  # Smoothness of the curve
         )
     
     def points(self):
@@ -122,7 +125,7 @@ def create_gear_patch(gear, hole_radius=0.2, facecolor='lightgray'):
     
     return patch, gear.pitch_radius
 
-def export_gears_only(module, teeth1, teeth2, pressure_angle, clearance, backlash, filename):
+def export_gears_only(module, teeth1, teeth2, pressure_angle, clearance, backlash, filename, frame_count):
     """
     Export only the gears to an SVG file without any additional elements
     
@@ -142,6 +145,8 @@ def export_gears_only(module, teeth1, teeth2, pressure_angle, clearance, backlas
         Backlash
     filename : str
         Output filename
+    frame_count : int
+        Number of points to generate per curve
     """
     # Create a figure with transparent background
     fig, ax = plt.subplots(figsize=(12, 10), facecolor='none')
@@ -153,7 +158,8 @@ def export_gears_only(module, teeth1, teeth2, pressure_angle, clearance, backlas
         pressure_angle=pressure_angle,
         clearance=clearance,
         backlash=backlash,
-        profile_shift=0
+        profile_shift=0,
+        frame_count=frame_count
     )
     gear1, pitch_radius1 = create_gear_patch(gear1_obj, hole_radius=3.0)
     ax.add_patch(gear1)
@@ -165,7 +171,8 @@ def export_gears_only(module, teeth1, teeth2, pressure_angle, clearance, backlas
         pressure_angle=pressure_angle,
         clearance=clearance,
         backlash=backlash,
-        profile_shift=0
+        profile_shift=0,
+        frame_count=frame_count
     )
     center_distance = gear1_obj.pitch_radius + gear2_obj.pitch_radius
 
@@ -203,6 +210,7 @@ def main():
     parser.add_argument('--save', type=str, help='Save figure to file (SVG, PNG, PDF, etc.)')
     parser.add_argument('--gears-only', type=bool, default=True, help='Export only the gears to a file')
     parser.add_argument('--show', type=bool, default=True, help='Show the figure')
+    parser.add_argument('--frame-count', type=int, default=4, help='Number of points per curve (lower values = fewer vertices)')
     args = parser.parse_args()
 
     # If gears-only mode is requested and a filename is provided
@@ -214,7 +222,8 @@ def main():
             args.pressure_angle, 
             args.clearance, 
             args.backlash, 
-            args.save
+            args.save,
+            args.frame_count
         )
         return
 
@@ -234,7 +243,8 @@ def main():
         pressure_angle=pressure_angle,
         clearance=args.clearance,
         backlash=args.backlash,
-        profile_shift=0
+        profile_shift=0,
+        frame_count=args.frame_count
     )
     gear1, pitch_radius1 = create_gear_patch(gear1_obj, hole_radius=3.0)
     ax.add_patch(gear1)
@@ -248,7 +258,8 @@ def main():
         pressure_angle=pressure_angle,
         clearance=args.clearance,
         backlash=args.backlash,
-        profile_shift=0
+        profile_shift=0,
+        frame_count=args.frame_count
     )
     center_distance = gear1_obj.pitch_radius + gear2_obj.pitch_radius  # Theoretical center distance
 
