@@ -1,0 +1,4 @@
+[submodule "lib/gear-profile-generator"]
+	path = lib/gear-profile-generator
+	url = https://github.com/leventelist/gear-profile-generator.git
+	branch = python3_support
